@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:collection/collection.dart';
+import 'package:auto_route_generator/utils.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/modelli/articleInCart.dart';
 import 'package:dashboard/modelli/articleWithPriceList.dart';
@@ -59,9 +59,9 @@ class _ModuloOpzioniState extends State<ModuloOpzioni> {
     if( corver > 0 )  numeroPersoneCtrl.text = corver.toString();
     super.initState();
   }
-  
- 
-  
+
+
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder( builder: (context, constraints){
@@ -154,7 +154,7 @@ class _ModuloOpzioniState extends State<ModuloOpzioni> {
           children: [
             boxValore(
               "Totale",
-              "${carrello.totaleCarrello.toStringAsFixed(2).replaceAll('.', ',')} €",
+              "${carrello.totalCheckoutFinal.toStringAsFixed(2).replaceAll('.', ',')} €",
               bg: TemaApp.verdeBrand,
               highlight: true,
             ),

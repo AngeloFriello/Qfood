@@ -718,19 +718,19 @@ class OrdineDettaglioDialog extends StatelessWidget {
   Future<void> _eliminaOrdine(BuildContext context) async {
     final conferma = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('Elimina ordine'),
         content: const Text(
           'Sei sicuro di voler eliminare questa consegna?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(_, false),
             child: const Text('Annulla'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(_, true),
             child: const Text('Elimina'),
           ),
         ],

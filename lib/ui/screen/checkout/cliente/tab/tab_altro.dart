@@ -94,7 +94,7 @@ Widget _dropdown(String label, {String? value}) {
       final isDark = theme.brightness == Brightness.dark;
 
       return DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         items: const [],
         onChanged: (_) {},
         style: theme.textTheme.bodyMedium,

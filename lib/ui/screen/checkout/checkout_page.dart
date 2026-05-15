@@ -30,10 +30,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
 
   void _onConferma() {
+
     debugPrint("👉 CONFERMA PREMUTA");
+
     // TODO:
-    // - vendita normale
-    // - riscontro (nonRiscosso)
+    // tua logica pagamento
+    // stampa
+    // salvataggio ecc
+
+    Navigator.pop(context, true);
   }
 
   //bool get checkoutCompleto => context.watch<CarrelloController>().checkoutCompleto;

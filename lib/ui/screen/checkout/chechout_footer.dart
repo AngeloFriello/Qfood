@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:collection/collection.dart';
+import 'package:auto_route_generator/utils.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/app/service/service_connection.dart';
 import 'package:dashboard/app/service/service_report.dart';
@@ -180,7 +180,7 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
                           if (mounted) setState(() => confirmAndSend = v);
                         });
                       },
-                      thumbColor: WidgetStateProperty.all(isDark ? Colors.white : Colors.black),
+                      activeThumbColor: isDark ? Colors.white : Colors.black,
                     ),
                   ],
                 ),
@@ -245,40 +245,26 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
               // ── PUNTO 3: onPressed condizionale ─────────────────────
               onPressed: abilitaConferma
                   ? () async {
-                        debugPrint('🟢 [CONFERMA] Bottone premuto');
                       try {
+
+                        //GESTISCE UNA SIMULAZIONE SENZA STAMPANTE COLLEGATA
+                        final ctrModuloPagamento =
+                        context.read<ControllerModuloPagamenti>();
+
+                        carrello.riscontro = true;
+
+                        ctrModuloPagamento.setNessunaStampa(true);
+
+
                         //CONTROLLO MOTIVO SCONTO
-                          final discountResult = await modalDiscountReason(
-                            context,
-                          );
-                          debugPrint(
-                            '🔍 [CONFERMA] modalDiscountReason result: $discountResult',
-                          );
-                          if (discountResult == false) {
-                            debugPrint(
-                              '⛔ [CONFERMA] Bloccato da modalDiscountReason (result == false)',
-                            );
-                            return;
-                          }
+                        if ( await  modalDiscountReason(context) ==  false) return;
 
                         final ctrPaymentType = context.read<ControllerModuloPagamenti>();
                         String tipoDocumento = ctrPaymentType.tipoDocumento;
-                          debugPrint(
-                            '🔍 [CONFERMA] tipoDocumento: $tipoDocumento',
-                          );
                         final ctrlLook = context.read<ControllerLookPosInPrinder>();
                         final ctrlCart = context.read<CarrelloController>();
-                          debugPrint(
-                            '🔍 [CONFERMA] orderInEdit: ${ctrlCart.orderinEdit}, totale: ${ctrlCart.totalWithTipsAndDiscount}',
-                          );
                         await Ordine.uploadReceiptToPrinted( ctrlCart.orderinEdit ?? 0);
-                          debugPrint(
-                            '🔍 [CONFERMA] paymentsSelected: ${ctrPaymentType.paymentsSelected}',
-                          );
                         if (ctrPaymentType.paymentsSelected.isEmpty) {
-                            debugPrint(
-                              '⛔ [CONFERMA] Bloccato: nessun metodo di pagamento selezionato',
-                            );
                           SnackBarForcedClosure( 'Selezionare un metodo di pagamento', Colors.red);
                           return;
                         }
@@ -286,37 +272,19 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
                         double amoutPayments = 0;
                         ctrPaymentType.controllerTabPayment.forEach((pc) {
                           if ( ctrPaymentType.paymentsSelected.contains(pc['id']) ) {
-                              final txt =
-                                  (pc['controller'] as TextEditingController)
-                                      .text;
-                              debugPrint(
-                                '🔍 [CONFERMA] pagamento id=${pc['id']} valore="$txt"',
-                              );
-                              if (txt.isEmpty) return;
-                              amoutPayments += double.parse(txt);
+                            if ((pc['controller'] as TextEditingController).text.isEmpty) return;
+                            amoutPayments += double.parse(
+                                (pc['controller'] as TextEditingController)
+                                    .text);
                           }
                         });
 
-                          final totaleCarrello = double.parse(
-                            ctrlCart.totalWithTipsAndDiscount.toStringAsFixed(
-                              2,
-                            ),
-                          );
-                          debugPrint(
-                            '🔍 [CONFERMA] amountPayments=$amoutPayments  totaleCarrello=$totaleCarrello  match=${amoutPayments == totaleCarrello}',
-                          );
-                          if (amoutPayments != totaleCarrello) {
-                            debugPrint(
-                              '⛔ [CONFERMA] Bloccato: totale pagamenti ($amoutPayments) != totale carrello ($totaleCarrello)',
-                            );
+                        if ( amoutPayments != double.parse(ctrlCart.totalWithTipsAndDiscount.toStringAsFixed(2)) ) {
                           SnackBarForcedClosure(
                               "Il totale dei pagamenti non corrisponde all' importo del carrello",
                               Colors.red);
                           return;
                         }
-                          debugPrint(
-                            '✅ [CONFERMA] Tutti i controlli superati — procedo con la stampa/archiviazione',
-                          );
 
                         /* if (tipoDocumento == 'Fattura') {
                           if (carrello.cliente == null) {
@@ -486,31 +454,185 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
                           ControllerModuloPagamenti ctrModuloPagamento = context.read<ControllerModuloPagamenti>();
 
                           if( ctrModuloPagamento.nessunaStampa == true ){
-                            if (controllerNotFiscal.inPrintig_) return;
-                              controllerNotFiscal.setInPrinting(true);
-                              // RECUPERO IL PAGAMENTO CASH
-                              final PaymentModel? paymentsCash = await PaymentModel.getCashPayment();
-                              if (paymentsCash == null) return;
-                              carrello.addPayment(Payment(
-                                title:     paymentsCash.title,
-                                tend:      paymentsCash.tend ?? 1,
-                                idPayment: paymentsCash.id,
-                                amount:    carrello.totaleCarrello - carrello.discount,
-                              ));
-                              await ScontrinoService.archiveDocumentInLocalDb( carrello, 'simulation' );
-                              await TurnoLavoro.addDocumentToShift(
-                                tipoDocumento:   'simulation',
-                                totaleDocumento: carrello.totaleCarrello,
-                                contanti:        carrello.totaleCarrello,
-                                sconto:          carrello.discount,
-                                amountBeverage:  carrello.getAmountSplitTypeProduct()['beverage'] as double,
-                                amountAltro:     carrello.getAmountSplitTypeProduct()['altro']    as double,
-                                amountFood:      carrello.getAmountSplitTypeProduct()['food']     as double,
-                              );
-                              controllerNotFiscal.setInPrinting(false);
-                              ctrModuloPagamento.setNessunaStampa(false);
-                              Navigator.pop(context);
+
+                            debugPrint("======================================");
+                            debugPrint("-> CHECKOUT SIMULATO SENZA STAMPANTE");
+                            debugPrint("======================================");
+
+                            // BLOCCO DOPPI CLICK
+                            if (controllerNotFiscal.inPrintig_) {
+                              debugPrint("-> Stampa già in corso");
                               return;
+                            }
+
+                            controllerNotFiscal.setInPrinting(true);
+
+                            debugPrint("-> Totale carrello: "
+                                "${carrello.totalWithTipsAndDiscount.toStringAsFixed(2)}");
+
+                            debugPrint("-> Sconto: "
+                                "${carrello.discount.toStringAsFixed(2)}");
+
+                            debugPrint("======================================");
+                            debugPrint("-> PRODOTTI");
+                            debugPrint("======================================");
+
+                            for(final p in carrello.prodotti){
+
+                              debugPrint(
+                                  "-> ${p.article.title} | "
+                                      "Qt: ${p.quantity} | "
+                                      "Prezzo: €${p.priceRowCart.toStringAsFixed(2)}"
+                              );
+
+                              final vars = [
+                                ...p.variationsFree,
+                                ...p.variationsInfo,
+                                ...p.variationsMinus,
+                                ...p.variationsPlus,
+                              ];
+
+                              for(final v in vars){
+
+                                debugPrint(
+                                    "   ↳ Variante: ${v.article.title} "
+                                        "(${v.variationType}) "
+                                        "€${v.priceRowCart.toStringAsFixed(2)}"
+                                );
+                              }
+                            }
+
+                            debugPrint("======================================");
+                            debugPrint("-> PAGAMENTI ATTUALI");
+                            debugPrint("======================================");
+
+
+                            // RECUPERO PAGAMENTO CASH
+                            final PaymentModel? paymentsCash =
+                            await PaymentModel.getCashPayment();
+
+                            if (paymentsCash == null) {
+
+                              debugPrint("-> Metodo cash non trovato");
+
+                              controllerNotFiscal.setInPrinting(false);
+
+                              return;
+                            }
+
+                            debugPrint("-> Metodo cash trovato: ${paymentsCash.title}");
+
+                            // AGGIUNGO PAGAMENTO CASH
+                            // AGGIUNGO PAGAMENTO CASH SOLO SE NON ESISTE GIÀ
+                            if (carrello.getPayments.isEmpty) {
+
+                              carrello.addPayment(
+                                Payment(
+                                  title: paymentsCash.title,
+                                  tend: paymentsCash.tend ?? 1,
+                                  idPayment: paymentsCash.id,
+                                  amount: carrello.totalWithTipsAndDiscount,
+                                ),
+                              );
+
+                              debugPrint("-> Pagamento cash aggiunto");
+
+                            } else {
+
+                              debugPrint("-> Pagamento già presente");
+
+                            }
+
+                            debugPrint("======================================");
+                            debugPrint("-> PAGAMENTI FINALI");
+                            debugPrint("======================================");
+
+                            double totalePagamenti = 0;
+
+                            for(final pay in carrello.getPayments){
+
+                              totalePagamenti += pay.amount;
+
+                              debugPrint(
+                                  "-> ${pay.title} "
+                                      "€${pay.amount.toStringAsFixed(2)}"
+                              );
+                            }
+
+                            debugPrint("======================================");
+                            debugPrint("-> TOTALE FINALE");
+                            debugPrint("======================================");
+
+
+                            debugPrint(
+                                "-> Totale pagamenti: "
+                                    "${totalePagamenti.toStringAsFixed(2)}"
+                            );
+
+                            debugPrint(
+                                "-> Totale carrello: "
+                                    "${carrello.totalWithTipsAndDiscount.toStringAsFixed(2)}"
+                            );
+
+                            debugPrint("======================================");
+                            debugPrint("-> CONTROLLO TOTALI");
+                            debugPrint("======================================");
+
+                            debugPrint(
+                                "-> Totale carrello: "
+                                    "${carrello.totalWithTipsAndDiscount.toStringAsFixed(2)}"
+                            );
+
+                            debugPrint(
+                                "-> Totale pagamenti: "
+                                    "${totalePagamenti.toStringAsFixed(2)}"
+                            );
+
+                            final checkOk =
+                                (totalePagamenti -
+                                    carrello.totalWithTipsAndDiscount).abs() < 0.01;
+
+                            debugPrint("-> Match totale: $checkOk");
+
+                            debugPrint("======================================");
+                            debugPrint("-> ARCHIVIAZIONE DOCUMENTO");
+                            debugPrint("======================================");
+
+                            await ScontrinoService.archiveDocumentInLocalDb(
+                              carrello,
+                              'simulation',
+                            );
+
+                            debugPrint("-> Documento archiviato");
+
+                            debugPrint("======================================");
+                            debugPrint("-> TURNO LAVORO");
+                            debugPrint("======================================");
+
+                            await TurnoLavoro.addDocumentToShift(
+                              tipoDocumento:   'simulation',
+                              totaleDocumento: carrello.totaleCarrello,
+                              contanti:        carrello.totaleCarrello,
+                              sconto:          carrello.discount,
+                              amountBeverage:  carrello.getAmountSplitTypeProduct()['beverage'] as double,
+                              amountAltro:     carrello.getAmountSplitTypeProduct()['altro']    as double,
+                              amountFood:      carrello.getAmountSplitTypeProduct()['food']     as double,
+                            );
+
+                            debugPrint("-> Turno aggiornato");
+
+                            debugPrint("======================================");
+                            debugPrint("-> CHECKOUT SIMULATO COMPLETATO");
+                            debugPrint("======================================");
+
+                            controllerNotFiscal.setInPrinting(false);
+
+                            ctrModuloPagamento.setNessunaStampa(false);
+
+                            Navigator.pop(context, true);
+
+
+                            return;
                           }
                           // SE IN USO LA STAMPANTE FISCALE BLOCCO IL CLICK
                           if (controllerNotFiscal.inPrintig_) return;

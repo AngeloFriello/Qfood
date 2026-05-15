@@ -64,6 +64,8 @@ class _TavoloOperativoPageState extends State<TavoloOperativoPage> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final ctrTavolo = context.watch<ControllerTableOpened>();
+    final ctrTableCart =
+    context.watch<ControllerTableOpened>();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -156,9 +158,9 @@ class _TavoloOperativoPageState extends State<TavoloOperativoPage> {
                           SizedBox(
                             width: 320,
                             child: TavoloActionPanelDesktop(
-                            setState:   () => setState(() {
-                                
-                              })
+                              tavolo: widget.tavolo,
+                              setState: () => setState(() {}),
+                              products: ctrTableCart.products,
                             ),
                           ),
       
@@ -166,9 +168,11 @@ class _TavoloOperativoPageState extends State<TavoloOperativoPage> {
                           SizedBox(
                             width: 260,
                             child: TavoloActionPanelDesktop(
-                              setState:   () => setState(() {}
+                              tavolo: widget.tavolo,
+                              setState: () => setState(() {}),
+                              products: ctrTableCart.products,
                             ),
-                          ),)
+                          ),
       
                       ],
                     );

@@ -109,7 +109,7 @@ class _TavoloOrderSectionState extends State<TavoloOrderSection> {
           Expanded(
             child: ListView.builder(
               itemCount: ctrTableCart.products.length,
-              itemBuilder: (context, i) => _buildRow(context, ctrTableCart.products[i]),
+              itemBuilder: (_, i) => _buildRow(_, ctrTableCart.products[i]),
             ),
           ),
         ],
