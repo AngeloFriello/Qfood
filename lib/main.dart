@@ -59,18 +59,24 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
 
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    final bool enableKioskMode = kReleaseMode;
     await windowManager.ensureInitialized();
 
-    const WindowOptions windowOptions = WindowOptions(
+    final WindowOptions windowOptions = WindowOptions(
       size: Size(1280, 800),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
+      titleBarStyle:
+          enableKioskMode ? TitleBarStyle.hidden : TitleBarStyle.normal,
     );
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setFullScreen(true); // full screen per windows mac e os
+      if (enableKioskMode) {
+        await windowManager.setFullScreen(
+          true,
+        ); // full screen per windows mac e os
+      }
       await windowManager.show();
       await windowManager.focus();
     });

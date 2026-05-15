@@ -128,8 +128,6 @@ flutter:
     - assets/logoback.png
     - assets/logodark.png
     - assets/logosuverde.png
-    - assets/images/thump/
-    - assets/svgs/
     - assets/translations/
     # Google fonts, font assets
     - assets/google_fonts/

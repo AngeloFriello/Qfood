@@ -44,6 +44,7 @@ class ControllerModuloPagamenti extends ChangeNotifier{
           carrello.addPayment(Payment(title: cashPayment.title, tend: cashPayment.tend ?? 1, idPayment: cashPayment.id, amount: (carrello.totalWithTipsAndDiscount)));
          }
       }
+      notifyListeners();
     }catch( err ){
       debugPrint(err.toString());
     }

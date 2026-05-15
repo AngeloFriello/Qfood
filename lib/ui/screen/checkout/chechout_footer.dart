@@ -245,16 +245,40 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
               // ── PUNTO 3: onPressed condizionale ─────────────────────
               onPressed: abilitaConferma
                   ? () async {
+                        debugPrint('🟢 [CONFERMA] Bottone premuto');
                       try {
                         //CONTROLLO MOTIVO SCONTO
-                        if ( await  modalDiscountReason(context) ==  false) return;
+                          final discountResult = await modalDiscountReason(
+                            context,
+                          );
+                          debugPrint(
+                            '🔍 [CONFERMA] modalDiscountReason result: $discountResult',
+                          );
+                          if (discountResult == false) {
+                            debugPrint(
+                              '⛔ [CONFERMA] Bloccato da modalDiscountReason (result == false)',
+                            );
+                            return;
+                          }
 
                         final ctrPaymentType = context.read<ControllerModuloPagamenti>();
                         String tipoDocumento = ctrPaymentType.tipoDocumento;
+                          debugPrint(
+                            '🔍 [CONFERMA] tipoDocumento: $tipoDocumento',
+                          );
                         final ctrlLook = context.read<ControllerLookPosInPrinder>();
                         final ctrlCart = context.read<CarrelloController>();
+                          debugPrint(
+                            '🔍 [CONFERMA] orderInEdit: ${ctrlCart.orderinEdit}, totale: ${ctrlCart.totalWithTipsAndDiscount}',
+                          );
                         await Ordine.uploadReceiptToPrinted( ctrlCart.orderinEdit ?? 0);
+                          debugPrint(
+                            '🔍 [CONFERMA] paymentsSelected: ${ctrPaymentType.paymentsSelected}',
+                          );
                         if (ctrPaymentType.paymentsSelected.isEmpty) {
+                            debugPrint(
+                              '⛔ [CONFERMA] Bloccato: nessun metodo di pagamento selezionato',
+                            );
                           SnackBarForcedClosure( 'Selezionare un metodo di pagamento', Colors.red);
                           return;
                         }
@@ -262,19 +286,37 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
                         double amoutPayments = 0;
                         ctrPaymentType.controllerTabPayment.forEach((pc) {
                           if ( ctrPaymentType.paymentsSelected.contains(pc['id']) ) {
-                            if ((pc['controller'] as TextEditingController).text.isEmpty) return;
-                            amoutPayments += double.parse(
-                                (pc['controller'] as TextEditingController)
-                                    .text);
+                              final txt =
+                                  (pc['controller'] as TextEditingController)
+                                      .text;
+                              debugPrint(
+                                '🔍 [CONFERMA] pagamento id=${pc['id']} valore="$txt"',
+                              );
+                              if (txt.isEmpty) return;
+                              amoutPayments += double.parse(txt);
                           }
                         });
 
-                        if ( amoutPayments != double.parse(ctrlCart.totalWithTipsAndDiscount.toStringAsFixed(2)) ) {
+                          final totaleCarrello = double.parse(
+                            ctrlCart.totalWithTipsAndDiscount.toStringAsFixed(
+                              2,
+                            ),
+                          );
+                          debugPrint(
+                            '🔍 [CONFERMA] amountPayments=$amoutPayments  totaleCarrello=$totaleCarrello  match=${amoutPayments == totaleCarrello}',
+                          );
+                          if (amoutPayments != totaleCarrello) {
+                            debugPrint(
+                              '⛔ [CONFERMA] Bloccato: totale pagamenti ($amoutPayments) != totale carrello ($totaleCarrello)',
+                            );
                           SnackBarForcedClosure(
                               "Il totale dei pagamenti non corrisponde all' importo del carrello",
                               Colors.red);
                           return;
                         }
+                          debugPrint(
+                            '✅ [CONFERMA] Tutti i controlli superati — procedo con la stampa/archiviazione',
+                          );
 
                         /* if (tipoDocumento == 'Fattura') {
                           if (carrello.cliente == null) {

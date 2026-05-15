@@ -32,6 +32,10 @@ class _ModuloPagamentiState extends State<ModuloPagamenti> {
     final ctrlModuloPagamenti = context.read<ControllerModuloPagamenti>();
     await ctrlModuloPagamenti.getPaymentsDB(context);
     if(mounted){
+      // Ora controllerTabPayment è popolato → pre-seleziona contanti con il totale
+      await ctrlModuloPagamenti.setFirstTotalForCaschAndResetOthersPayments(
+        context,
+      );
       setState(() {});
     }
   }

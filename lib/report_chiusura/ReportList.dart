@@ -29,9 +29,16 @@ class ReportChiusuraWidget extends StatelessWidget {
           children: [
             _ReportTable(rows: [
               ['', 'N°', 'Importo'],
-              ['Scontrini incassati',    '${report_.n_scontrini}',    '€ ${report_.scontrini_incassati.toStringAsFixed(2)}'],
-              if(bancoAbilitato.value)    ['Riscontri',    '${report_.n_simulation}',    '€ ${report_.simulation.toStringAsFixed(2)}'],
-              ['Scontrini sospesi',      '${report_.n_scontrini_sospesi}',      '€ ${report_.scontrini_sospesi.toStringAsFixed(2)}'],
+                [
+                  'Scontrini incassati',
+                  '${report_.n_scontrini - report_.n_simulation}',
+                  '€ ${(report_.scontrini_incassati - report_.simulation).toStringAsFixed(2)}',
+                ],
+                [
+                  'Scontrini sospesi',
+                  '${report_.n_simulation}',
+                  '€ ${report_.simulation.toStringAsFixed(2)}',
+                ],
               ['Scontrini non incassati','${report_.n_scontrini_non_incassati}','€ ${report_.scontrini_non_incassati.toStringAsFixed(2)}'],
               ['Scontrini annullati',    '${report_.n_scontrini_annullati}',    '€ ${report_.scontrini_annullati.toStringAsFixed(2)}'],
               ['Fatture incassate',      '${report_.n_fatture_incassate}',      '€ ${report_.fatture_incassate.toStringAsFixed(2)}'],
@@ -315,19 +322,25 @@ class _PaymentsTable extends StatelessWidget {
         ...methods.map((key) {
           final qta    = (payments['${key}_qta'] ?? 0).toInt();
           final amount = payments[key] ?? 0.0;
-          if( !simulation && key.trim().toUpperCase().contains('contanti'.trim().toUpperCase()) ){
-            return TableRow(children: [
-                Padding(padding: const EdgeInsets.all(6), child: Text(key, style: const TextStyle(fontSize: 13))),
-                Padding(padding: const EdgeInsets.all(6), child: Text('${qta - report_!.n_simulation }', style: const TextStyle(fontSize: 13))),
-                Padding(padding: const EdgeInsets.all(6), child: Text('€ ${(amount -report_!.simulation).toStringAsFixed(2)}', style: const TextStyle(fontSize: 13))),
-              ]);
-          }else{
-              return TableRow(children: [
-                Padding(padding: const EdgeInsets.all(6), child: Text(key, style: const TextStyle(fontSize: 13))),
-                Padding(padding: const EdgeInsets.all(6), child: Text('$qta', style: const TextStyle(fontSize: 13))),
-                Padding(padding: const EdgeInsets.all(6), child: Text('€ ${amount.toStringAsFixed(2)}', style: const TextStyle(fontSize: 13))),
-              ]);
-          } 
+          return TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: Text(key, style: const TextStyle(fontSize: 13)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: Text('$qta', style: const TextStyle(fontSize: 13)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: Text(
+                  '€ ${amount.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ],
+          );
         }),
        if(  report_ != null && simulation ) TableRow(
           children: [

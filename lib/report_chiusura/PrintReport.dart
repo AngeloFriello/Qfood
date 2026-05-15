@@ -92,8 +92,18 @@ if (connect != PosPrintResult.success) {
   bytes += generator.text('DOCUMENTI EMESSI', styles: sBoldUnderline);
   bytes += generator.emptyLines(1);
 
-  bytes += _rigaQtaTot(generator, 'Scontrini incassati',   '${rep.n_scontrini_incassati}',     _fmt(rep.scontrini_incassati));
-  bytes += _rigaQtaTot(generator, 'Scontrini sospesi',     '${rep.n_scontrini_sospesi}',       _fmt(rep.scontrini_sospesi));
+    bytes += _rigaQtaTot(
+      generator,
+      'Scontrini incassati',
+      '${rep.n_scontrini - rep.n_simulation}',
+      _fmt(rep.scontrini_incassati - rep.simulation),
+    );
+    bytes += _rigaQtaTot(
+      generator,
+      'Scontrini sospesi',
+      '${rep.n_simulation}',
+      _fmt(rep.simulation),
+    );
   bytes += _rigaQtaTot(generator, 'Scontrini non inc.',    '${rep.n_scontrini_non_incassati}', _fmt(rep.scontrini_non_incassati));
   bytes += _rigaQtaTot(generator, 'Scontrini annullati',   '${rep.n_scontrini_annullati}',     _fmt(rep.scontrini_annullati));
   bytes += _rigaQtaTot(generator, 'Fatture incassate',     '${rep.n_fatture_incassate}',       _fmt(rep.fatture_incassate));
@@ -117,27 +127,11 @@ if (connect != PosPrintResult.success) {
   bytes += generator.emptyLines(1);
 
   if (rep.paymentsAmountAndQta != null) {
-      rep.paymentsAmountAndQta!.entries.where((e) => !e.key.endsWith('_qta')).forEach((e) {
-
-      int qta = (rep.paymentsAmountAndQta!['${e.key}_qta'] ?? 0).toInt();
-      if( e.key.trim().toUpperCase().contains('Contanti'.trim().toUpperCase()) ){
-        if( !simulazione ){
-          qta = qta - rep.n_simulation;
-        }
-      }
-
-      String kk = e.key.trim().toUpperCase();
-      if( kk.contains( 'Contanti'.toUpperCase() ) ){
-
-        if( !simulazione ){
-          bytes += _rigaQtaTot(generator, e.key, '$qta', _fmt(e.value - rep.simulation));
-        }else{
-          bytes += _rigaQtaTot(generator, e.key, '$qta', _fmt(e.value));
-        }
-
-      }else{
-        bytes += _rigaQtaTot(generator, e.key, '$qta', _fmt(e.value));
-      }
+      rep.paymentsAmountAndQta!.entries
+          .where((e) => !e.key.endsWith('_qta'))
+          .forEach((e) {
+            int qta = (rep.paymentsAmountAndQta!['${e.key}_qta'] ?? 0).toInt();
+            bytes += _rigaQtaTot(generator, e.key, '$qta', _fmt(e.value));
     });
   }
   if( simulazione) bytes += _rigaQtaTot(generator, 'di cui riscontro', '${rep.n_simulation}', _fmt(rep.simulation));
