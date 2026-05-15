@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import 'package:auto_route_generator/utils.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/modelli/document.dart';
 import 'package:dashboard/modelli/payment.dart';
@@ -32,10 +32,6 @@ class _ModuloPagamentiState extends State<ModuloPagamenti> {
     final ctrlModuloPagamenti = context.read<ControllerModuloPagamenti>();
     await ctrlModuloPagamenti.getPaymentsDB(context);
     if(mounted){
-      // Ora controllerTabPayment è popolato → pre-seleziona contanti con il totale
-      await ctrlModuloPagamenti.setFirstTotalForCaschAndResetOthersPayments(
-        context,
-      );
       setState(() {});
     }
   }
@@ -502,7 +498,7 @@ class _ModuloPagamentiState extends State<ModuloPagamenti> {
       },
 
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 5),
+        padding: EdgeInsetsGeometry.only(bottom: 5),
         child: Container(
           height: 56, // [OLD] mantenuto
           decoration: BoxDecoration(

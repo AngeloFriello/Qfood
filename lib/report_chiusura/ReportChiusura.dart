@@ -989,14 +989,12 @@ class ReportChiusura {
           rep.sconti = rep.sconti + ((d.footDiscount ?? 0) *-1);
         }
 
-        if (d.overrideMovementType == 'simulation' ||
-            (d.overrideMovementType == null && d.documentRtNumber == null) ||
-            d.payments.any((p) => p.title == 'Non riscosso')) {
+        d.payments.forEach((p) {
+
+          if( d.overrideMovementType == 'simulation' ){
             rep.n_simulation ++;
             rep.simulation += d.amount + (d.tips ?? 0); 
           }
-
-        d.payments.forEach((p) {
 
           //if( d.overrideMovementType == 'simulation' ) return;
           if (rep.paymentsAmountAndQta!.keys.contains(p.title)) {
@@ -1115,37 +1113,14 @@ class ReportChiusura {
         
       }
 
-      // Scontrini sospesi (riscontri / non riscossi): use SQL so it works for all data
-      rep.n_scontrini_sospesi = await countDocumentsSimulation(
-        from: from,
-        to: to,
-        uuidRigaTurno: uuidRigaTurno,
-      );
-      rep.scontrini_sospesi = await sumDocumentsSimulationAmountAndTips(
-        from: from,
-        to: to,
-        uuidRigaTurno: uuidRigaTurno,
-      );
-
-      // n_scontrini = regular (IS NULL) + sospesi — so display can subtract sospesi to get incassati
-      final int _nRt = await countDocumentsRtStrict(
-        from: from,
-        to: to,
-        uuidRigaTurno: uuidRigaTurno,
-      );
-      final double _amtRt = await sumDocumentsRtStrictAmountAndTips(
-        from: from,
-        to: to,
-        uuidRigaTurno: uuidRigaTurno,
-      );
-      rep.n_scontrini_incassati = _nRt;
-      rep.n_scontrini = _nRt + rep.n_scontrini_sospesi;
+      rep.n_scontrini_incassati = await countDocumentsRt(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
+      rep.n_scontrini           = await countDocumentsRt(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.n_fatture_incassate   = await countDocumentsInvoice(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.n_scontrini_annullati = await countDocumentsRtDeleted(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.n_note_credito        = await countDocumentsCreditNote(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.n_totale_documenti    = await countDocuments(from: from, to: to, uuidRigaTurno: uuidRigaTurno) - rep.n_note_credito - rep.n_scontrini_annullati;
 
-      rep.scontrini_incassati = _amtRt + rep.scontrini_sospesi;
+      rep.scontrini_incassati   = await sumDocumentsRtAmountAndTips(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.fatture_incassate     = await sumDocumentsInvoiceAmount(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.note_credito          = await sumDocumentsNoteCreditAmount(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
       rep.scontrini_annullati   = await sumDocumentsRtDeletedAmount(from: from, to: to, uuidRigaTurno: uuidRigaTurno);
@@ -1345,46 +1320,6 @@ Future<double> sumDocumentsRtAmountAndTips({
 }
 
 
-// Counts only genuine scontrini (have a receipt number), excludes simulation/riscontri docs
-Future<int> countDocumentsRtStrict({
-  required DateTime from,
-  required DateTime to,
-  String? uuidRigaTurno,
-}) async {
-  final db = await LocalDB.instance();
-  final result = await db.rawQuery('''
-    SELECT COUNT(*) as count
-    FROM documents
-    WHERE overrideMovementType IS NULL
-      AND documentRtNumber IS NOT NULL
-      AND payments NOT LIKE '%Non riscosso%'
-      AND realDate >= ?
-      AND realDate <= ?
-      ${_uuidFilter(uuidRigaTurno)}
-    ''', _args(from.toIso8601String(), to.toIso8601String(), uuidRigaTurno));
-  return Sqflite.firstIntValue(result) ?? 0;
-}
-
-Future<double> sumDocumentsRtStrictAmountAndTips({
-  required DateTime from,
-  required DateTime to,
-  String? uuidRigaTurno,
-}) async {
-  final db = await LocalDB.instance();
-  final result = await db.rawQuery('''
-    SELECT SUM(amount + COALESCE(tips, 0)) as total
-    FROM documents
-    WHERE overrideMovementType IS NULL
-      AND documentRtNumber IS NOT NULL
-      AND payments NOT LIKE '%Non riscosso%'
-      AND realDate >= ?
-      AND realDate <= ?
-      ${_uuidFilter(uuidRigaTurno)}
-    ''', _args(from.toIso8601String(), to.toIso8601String(), uuidRigaTurno));
-  return (result.first['total'] as num?)?.toDouble() ?? 0.0;
-}
-
-
 Future<int> countDocumentsCreditNote({
   required DateTime from,
   required DateTime to,
@@ -1437,9 +1372,7 @@ Future<int> countDocumentsSimulation({
     '''
     SELECT COUNT(*) as count
     FROM documents
-    WHERE (overrideMovementType = 'simulation'
-           OR (overrideMovementType IS NULL AND documentRtNumber IS NULL)
-           OR payments LIKE '%Non riscosso%')
+    WHERE overrideMovementType = 'simulation'
       AND realDate >= ?
       AND realDate <= ?
       ${_uuidFilter(uuidRigaTurno)}
@@ -1447,26 +1380,6 @@ Future<int> countDocumentsSimulation({
     _args(from.toIso8601String(), to.toIso8601String(), uuidRigaTurno),
   );
   return Sqflite.firstIntValue(result) ?? 0;
-}
-
-
-Future<double> sumDocumentsSimulationAmountAndTips({
-  required DateTime from,
-  required DateTime to,
-  String? uuidRigaTurno,
-}) async {
-  final db = await LocalDB.instance();
-  final result = await db.rawQuery('''
-    SELECT SUM(amount + COALESCE(tips, 0)) as total
-    FROM documents
-    WHERE (overrideMovementType = 'simulation'
-           OR (overrideMovementType IS NULL AND documentRtNumber IS NULL)
-           OR payments LIKE '%Non riscosso%')
-      AND realDate >= ?
-      AND realDate <= ?
-      ${_uuidFilter(uuidRigaTurno)}
-    ''', _args(from.toIso8601String(), to.toIso8601String(), uuidRigaTurno));
-  return (result.first['total'] as num?)?.toDouble() ?? 0.0;
 }
 
 

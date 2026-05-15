@@ -704,7 +704,7 @@ class TavoliVistaState extends State<TavoliVista> {
           minHeight: isTablet ? (tavoliRidotti ? 100 : 150) : 0,
         ),
         decoration: BoxDecoration(
-          border: tableMoved == t ? Border.all(color: Colors.yellowAccent, width: 5) : null,
+          border: tableMoved == t ? BoxBorder.all(color: Colors.yellowAccent, width: 5) : null,
           color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isDark

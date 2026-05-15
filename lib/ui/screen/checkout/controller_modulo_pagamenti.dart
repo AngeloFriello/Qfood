@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import 'package:auto_route_generator/utils.dart';
 import 'package:dashboard/modelli/document.dart';
 import 'package:dashboard/modelli/payment.dart';
 import 'package:dashboard/state/controller_carrello.dart';
@@ -44,7 +44,6 @@ class ControllerModuloPagamenti extends ChangeNotifier{
           carrello.addPayment(Payment(title: cashPayment.title, tend: cashPayment.tend ?? 1, idPayment: cashPayment.id, amount: (carrello.totalWithTipsAndDiscount)));
          }
       }
-      notifyListeners();
     }catch( err ){
       debugPrint(err.toString());
     }

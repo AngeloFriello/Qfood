@@ -2,8 +2,6 @@ import 'package:dashboard/modelli/articleWithPriceList.dart';
 import 'package:dashboard/modelli/printer.dart';
 import 'package:uuid/uuid.dart';
 
-
-
 class ProdottoCarrello{
   String uuid; //univoco per riga del carrello
   String? rowGuidReference;
@@ -19,14 +17,14 @@ class ProdottoCarrello{
   final List<ProdottoCarrello> variationsPlus;
   final List<ProdottoCarrello> variationsInfo;
   final List<ProdottoCarrello> variationsFree;
-  final String                 nameOperator; 
+  final String                 nameOperator;
   final int                    idOperator;
   int                          printed;
   String? deletionNote;
   PrinterForArticle?           printsDestination;
   double discountPercentageRow;
 
-  
+
   ProdottoCarrello({
     required this.uuid,
     required this.isVariant,
@@ -48,7 +46,7 @@ class ProdottoCarrello{
     this.deletionNote,
     required this.discountPercentageRow
   });
-  
+
   Map<String, dynamic> toJsonEncodable() {
     return {
       'uuid': uuid,
@@ -87,7 +85,7 @@ class ProdottoCarrello{
     rowGuidReference = guid;
   }
 
- static List<ProdottoCarrello> parseNullListProdottoCarrello(dynamic list){
+  static List<ProdottoCarrello> parseNullListProdottoCarrello(dynamic list){
     List<ProdottoCarrello> c = [];
     if( list is List<ProdottoCarrello> ){
       return list;
@@ -127,29 +125,29 @@ class ProdottoCarrello{
 
   factory ProdottoCarrello.fromJson(Map<String, dynamic> json) {
     return ProdottoCarrello(
-      exit: json['exit'] as int?,
-      uuid: json['uuid'] as String,
-      rowGuidReference: json['rowGuidReference'] as String?,
-      isVariant: json['isVariant'] as bool,
-      variationType: json['variationType'] as String?,
-      article: (json['article'] is ArticleWhitPriceListModel) ? json['article'] : ArticleWhitPriceListModel.fromJson(json['article']),
-      quantity: json['quantity'] as double,
-      unitPrice: json['unitPrice'] as double,
-      percentageDiscount: json['percentageDiscount'] as double,
-      valueDiscount:   json['valueDiscount'] as double,
-      variationsMinus: parseNullListProdottoCarrello(json['variationsMinus']),
-      variationsPlus:  parseNullListProdottoCarrello(json['variationsPlus'] ),
-      variationsInfo:  parseNullListProdottoCarrello(json['variationsInfo']),
-      variationsFree:  parseNullListProdottoCarrello(json['variationsFree']),
-      nameOperator:    json['nameOperator'] ?? 'manca operatore',
-      idOperator:      json['idOperator']   ?? 0,
-      printed:         json['printed']      ?? 0,
-      deletionNote :   json['deletionNote'],
-      discountPercentageRow : json['discountPercentageRow'] ?? 0
+        exit: json['exit'] as int?,
+        uuid: json['uuid'] as String,
+        rowGuidReference: json['rowGuidReference'] as String?,
+        isVariant: json['isVariant'] as bool,
+        variationType: json['variationType'] as String?,
+        article: (json['article'] is ArticleWhitPriceListModel) ? json['article'] : ArticleWhitPriceListModel.fromJson(json['article']),
+        quantity: json['quantity'] as double,
+        unitPrice: json['unitPrice'] as double,
+        percentageDiscount: json['percentageDiscount'] as double,
+        valueDiscount:   json['valueDiscount'] as double,
+        variationsMinus: parseNullListProdottoCarrello(json['variationsMinus']),
+        variationsPlus:  parseNullListProdottoCarrello(json['variationsPlus'] ),
+        variationsInfo:  parseNullListProdottoCarrello(json['variationsInfo']),
+        variationsFree:  parseNullListProdottoCarrello(json['variationsFree']),
+        nameOperator:    json['nameOperator'] ?? 'manca operatore',
+        idOperator:      json['idOperator']   ?? 0,
+        printed:         json['printed']      ?? 0,
+        deletionNote :   json['deletionNote'],
+        discountPercentageRow : json['discountPercentageRow'] ?? 0
     );
   }
 
-    Map<String, Object?> toMap() {
+  Map<String, Object?> toMap() {
     return <String, Object?>{
       'exit' : exit,
       'uuid': uuid,
@@ -176,25 +174,25 @@ class ProdottoCarrello{
 
 
   Map<String, dynamic> toJson() =>{
-      'exit': exit,
-      'uuid': uuid,
-      'rowGuidReference': rowGuidReference,
-      'isVariant': isVariant,
-      'variationType' : variationType,
-      'article': article,
-      'quantity': quantity,
-      'unitPrice': unitPrice,
-      'percentageDiscount' : percentageDiscount,
-      'valueDiscount' : valueDiscount,
-      'variationsMinus': variationsMinus,
-      'variationsPlus' : variationsPlus,
-      'variationsInfo' : variationsInfo,
-      'variationsFree' : variationsFree,
-      'nameOperator'   : nameOperator,
-      'idOperator'     : idOperator,
-      'printed'        : printed,
-      'deletionNote'   : deletionNote,
-      'discountPercentageRow' : discountPercentageRow
+    'exit': exit,
+    'uuid': uuid,
+    'rowGuidReference': rowGuidReference,
+    'isVariant': isVariant,
+    'variationType' : variationType,
+    'article': article,
+    'quantity': quantity,
+    'unitPrice': unitPrice,
+    'percentageDiscount' : percentageDiscount,
+    'valueDiscount' : valueDiscount,
+    'variationsMinus': variationsMinus,
+    'variationsPlus' : variationsPlus,
+    'variationsInfo' : variationsInfo,
+    'variationsFree' : variationsFree,
+    'nameOperator'   : nameOperator,
+    'idOperator'     : idOperator,
+    'printed'        : printed,
+    'deletionNote'   : deletionNote,
+    'discountPercentageRow' : discountPercentageRow
   };
 
   double get  priceUnitOrigin => double.parse(article.price ?? '0');
@@ -205,10 +203,10 @@ class ProdottoCarrello{
   // valore netto (senza iva)
   double get priceNet    => unitPrice / (1 + vatValue / 100);
 
-   // valore netto riga (senza iva)
+  // valore netto riga (senza iva)
   double get priceNetRow => (priceNet / (1 + vatValue / 100)) * quantity;
 
-   // tasse
+  // tasse
   double get taxRow => priceRowCart - priceNetRow;
 
   // iva unitaria

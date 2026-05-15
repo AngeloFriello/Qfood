@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import 'package:auto_route_generator/utils.dart';
 import 'package:dashboard/modelli/articleInCart.dart';
 import 'package:dashboard/modelli/articleWithPriceList.dart';
 import 'package:dashboard/ui/screen/tavoli/operativita/widgets_tavolo/controllerTableOpened.dart';

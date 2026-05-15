@@ -1,6 +1,6 @@
 {
-    "name": "c",
-    "short_name": "c",
+    "name": "qfood",
+    "short_name": "qfood",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
