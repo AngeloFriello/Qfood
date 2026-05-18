@@ -78,6 +78,7 @@ Future<ListPriceModel?> getListPriceSelected() async {
     return listFinal;
   }catch( err ){
     debugPrint(err.toString());
+    return null;
   }
 
 }

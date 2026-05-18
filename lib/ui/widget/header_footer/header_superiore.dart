@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:auto_route_generator/utils.dart';
+import 'package:collection/collection.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/app/service/Service_Socket/service_ws_server.dart';
 import 'package:dashboard/app/service/service_new_update.dart';
@@ -234,7 +234,7 @@ class _HeaderSuperioreState extends State<HeaderSuperiore> {
                   ),
                   Badge(
                     isLabelVisible: newUpdate.newSync,
-                    alignment: AlignmentGeometry.bottomCenter,
+                    alignment: Alignment.bottomCenter,
                     label: Text("NEW"),
                     backgroundColor: Colors.red,
                       child: IconButton(
@@ -855,10 +855,7 @@ Widget _pulsanteListino(BuildContext context) {
                  builder: (context) =>  AlertDialog(
                   icon: Icon(Icons.warning),
                   title: Text('Attenzione, ci sono prodotti con prezzo a zero nel nuovo listino'),
-                  constraints: BoxConstraints(
-                    maxWidth: 500,
-                    maxHeight: 400
-                  ),
+
                 ));
             }
             return;

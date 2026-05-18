@@ -114,7 +114,7 @@ class _UploadDatiVistaState extends State<UploadDatiVista> {
                             ),
                             trailing: Switch(
                               value: attivo,
-                              activeThumbColor: verdeFlex,
+                              activeTrackColor: verdeFlex,
                               onChanged: (v) =>
                                   setState(() => selezioni[key] = v),
                             ),

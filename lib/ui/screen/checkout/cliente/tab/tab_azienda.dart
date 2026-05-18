@@ -459,7 +459,7 @@ Widget _input(
 
 Widget _dropdown(String label, dynamic value, List<DropdownMenuItem<dynamic>> items) {
   return DropdownButtonFormField<dynamic>(
-    initialValue: value,
+    value: value,
     items: items,
     onChanged: (_) {},
     style: const TextStyle(color: Colors.white),

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:auto_route_generator/utils.dart';
+import 'package:collection/collection.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/app/service/service_connection.dart';
 import 'package:dashboard/app/service/service_report.dart';
@@ -180,7 +180,7 @@ class _CheckoutFooterState extends State<CheckoutFooter> {
                           if (mounted) setState(() => confirmAndSend = v);
                         });
                       },
-                      activeThumbColor: isDark ? Colors.white : Colors.black,
+                      activeTrackColor: isDark ? Colors.white : Colors.black,
                     ),
                   ],
                 ),

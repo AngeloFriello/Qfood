@@ -315,7 +315,11 @@ class _PaymentsTable extends StatelessWidget {
         ...methods.map((key) {
           final qta    = (payments['${key}_qta'] ?? 0).toInt();
           final amount = payments[key] ?? 0.0;
-          if( !simulation && key.trim().toUpperCase().contains('contanti'.trim().toUpperCase()) ){
+          if (simulation &&
+              key
+                  .trim()
+                  .toUpperCase()
+                  .contains('contanti'.trim().toUpperCase())) {
             return TableRow(children: [
                 Padding(padding: const EdgeInsets.all(6), child: Text(key, style: const TextStyle(fontSize: 13))),
                 Padding(padding: const EdgeInsets.all(6), child: Text('${qta - report_!.n_simulation }', style: const TextStyle(fontSize: 13))),

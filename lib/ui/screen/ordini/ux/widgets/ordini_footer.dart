@@ -48,7 +48,7 @@ class OrdiniFooter extends StatelessWidget {
             onChanged: (_) {
               ctrl.setFiltroOrdiniCompletati(_);
             },
-            activeThumbColor: Colors.white,
+            thumbColor: WidgetStateProperty.all(Colors.white),
           ),
 
           const Spacer(),

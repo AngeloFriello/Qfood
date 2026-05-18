@@ -20,17 +20,17 @@ class ServiceReceipt {
 
 
   /// Apri cassetto
-  @override
   Future<void> openDrawer() async {
-    String? e;
     try{
       SharedPreferences pref = await SharedPreferences.getInstance();
       Map<String,dynamic>                  device = jsonDecode(pref.getString('device') ?? '{}');
       String? fiscalPrinterModel           = device['fiscalPrinterModel'];
       String? fiscalPrinterIpv4            = device['fiscalPrinterIpv4'];
       String? fiscalPrinterSerialNumber    = device['fiscalPrinterSerialNumber'];
-      if(device.isEmpty || fiscalPrinterSerialNumber == null || fiscalPrinterIpv4 == null || fiscalPrinterModel == null ){
-        e = "device not found in SharedPreferences";
+      if (device.isEmpty ||
+          fiscalPrinterSerialNumber == null ||
+          fiscalPrinterIpv4 == null ||
+          fiscalPrinterModel == null) {
         return;
       }
 
@@ -53,8 +53,7 @@ class ServiceReceipt {
     }
   }
 
-  /// Apri cassetto
-  @override
+  /// Chiusura fiscale
   Future<bool> fiscalClosure() async {
     bool resp_ = true;
     try{

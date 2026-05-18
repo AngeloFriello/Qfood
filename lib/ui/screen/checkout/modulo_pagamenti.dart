@@ -1,4 +1,4 @@
-import 'package:auto_route_generator/utils.dart';
+import 'package:collection/collection.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/modelli/document.dart';
 import 'package:dashboard/modelli/payment.dart';
@@ -498,7 +498,7 @@ class _ModuloPagamentiState extends State<ModuloPagamenti> {
       },
 
       child: Padding(
-        padding: EdgeInsetsGeometry.only(bottom: 5),
+        padding: const EdgeInsets.only(bottom: 5),
         child: Container(
           height: 56, // [OLD] mantenuto
           decoration: BoxDecoration(

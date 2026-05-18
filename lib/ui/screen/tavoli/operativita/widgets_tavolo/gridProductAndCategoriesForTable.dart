@@ -1,4 +1,4 @@
-import 'package:auto_route_generator/utils.dart';
+import 'package:collection/collection.dart';
 import 'package:dashboard/Global.dart';
 import 'package:dashboard/app/service/Service_Socket/service_ws_server.dart';
 import 'package:dashboard/modelli/article.dart';
